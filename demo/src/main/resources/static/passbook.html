@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Passbook - Virtual Banking System</title>
+
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+
+        body{
+            font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+            background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+            min-height:100vh;
+            padding:20px
+        }
+
+        .container{
+            max-width:1000px;
+            margin:auto;
+            background:#fff;
+            border-radius:16px;
+            box-shadow:0 20px 60px rgba(0,0,0,.3);
+            overflow:hidden
+        }
+
+        .header{
+            background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+            padding:30px;
+            color:#fff;
+            display:flex;
+            justify-content:space-between;
+            align-items:center
+        }
+
+        .header-left h1{font-size:28px}
+        .header-left p{font-size:14px;opacity:.9}
+
+        .btn-header{
+            padding:10px 20px;
+            border:2px solid #fff;
+            background:rgba(255,255,255,.2);
+            color:#fff;
+            border-radius:8px;
+            cursor:pointer;
+            font-weight:600;
+            text-decoration:none;
+            transition:.3s
+        }
+
+        .btn-header:hover{background:#fff;color:#667eea}
+
+        .content{padding:40px 30px}
+
+        .passbook-header{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            margin-bottom:30px
+        }
+
+        .balance-card{
+            background:linear-gradient(135deg,#667eea,#764ba2);
+            color:#fff;
+            padding:20px 30px;
+            border-radius:10px
+        }
+
+        .balance-card .amount{font-size:28px;font-weight:700}
+
+        .transactions-section{
+            background:#f8f9fa;
+            padding:30px;
+            border-radius:12px
+        }
+
+        .transactions-list{display:flex;flex-direction:column;gap:10px}
+
+        .transaction-item{
+            background:#fff;
+            padding:18px;
+            border-radius:10px;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            border-left:5px solid #667eea;
+            box-shadow:0 2px 8px rgba(0,0,0,.05)
+        }
+
+        .transaction-item.deposit{border-left-color:#43e97b}
+        .transaction-item.withdrawal{border-left-color:#f5576c}
+        .transaction-item.transfer{border-left-color:#4facfe}
+
+        .transaction-info{display:flex;gap:15px;align-items:center}
+
+        .transaction-icon{
+            width:45px;height:45px;
+            border-radius:50%;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:22px
+        }
+
+        .deposit .transaction-icon{background:#d4f8e8;color:#43e97b}
+        .withdrawal .transaction-icon{background:#fde0e5;color:#f5576c}
+        .transfer .transaction-icon{background:#d4e7ff;color:#4facfe}
+
+        .transaction-details .type{font-weight:600;color:#333}
+        .transaction-details .date{font-size:12px;color:#999}
+
+        .transaction-right{text-align:right}
+
+        .transaction-amount{font-size:16px;font-weight:700}
+        .deposit .transaction-amount{color:#43e97b}
+        .withdrawal .transaction-amount{color:#f5576c}
+        .transfer .transaction-amount{color:#4facfe}
+
+        .balance-display{font-size:12px;color:#999}
+
+        .pagination{
+            margin-top:20px;
+            display:flex;
+            justify-content:center;
+            gap:10px
+        }
+
+        .pagination button{
+            padding:8px 12px;
+            border:1px solid #ddd;
+            border-radius:6px;
+            cursor:pointer
+        }
+
+        .pagination .active{
+            background:#667eea;
+            color:#fff;
+            border-color:#667eea
+        }
+        .header > div {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-header{
+            min-width: 130px;
+            height: 42px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+
+        .message{display:none;margin-bottom:20px}
+        .message.show{display:block}
+    </style>
+</head>
+
+<body>
+<div class="container">
+
+    <div class="header">
+        <div class="header-left">
+            <h1>VBS</h1>
+        </div>
+        <div>
+            <a id="dashLink" class="btn-header">← Dashboard</a>
+            <button class="btn-header" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <div class="content">
+
+        <div class="passbook-header">
+            <h2>Your Passbook</h2>
+            <div class="balance-card">
+                <p>Current Balance</p>
+                <div class="amount">₹<span id="currentBalance">0.00</span></div>
+            </div>
+        </div>
+
+        <div class="transactions-section">
+            <div id="transactionsList" class="transactions-list"></div>
+            <div id="paginationControls" class="pagination"></div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    const API_URL = 'http://localhost:8081';
+    let userId, role;
+    let transactions = [];
+    let currentPage = 1;
+    const itemsPerPage = 10;
+
+    function getUserIdFromURL(){
+        const p = new URLSearchParams(window.location.search);
+        userId = p.get('id');
+        role = p.get('role') || 'customer';
+        if(!userId) location.href='login.html';
+        document.getElementById('dashLink').href =
+            `dashboard.html?id=${userId}&role=${encodeURIComponent(role)}`;
+    }
+
+    async function loadPassbook(){
+        const r = await fetch(`${API_URL}/passbook/${userId}`);
+        transactions = await r.json();
+        if(transactions.length)
+            document.getElementById('currentBalance').textContent =
+                transactions[transactions.length-1].currBalance.toFixed(2);
+        render();
+    }
+
+    function getType(d){
+        d=d.toLowerCase();
+        if(d.includes('deposit')) return 'deposit';
+        if(d.includes('withdrawal')) return 'withdrawal';
+        return 'transfer';
+    }
+
+    function render(){
+        const list = document.getElementById('transactionsList');
+        const pag = document.getElementById('paginationControls');
+
+        const sorted=[...transactions].sort((a,b)=>new Date(b.date)-new Date(a.date));
+        const totalPages=Math.ceil(sorted.length/itemsPerPage);
+        const slice=sorted.slice((currentPage-1)*itemsPerPage,currentPage*itemsPerPage);
+
+        list.innerHTML=slice.map(t=>{
+            const type = getType(t.description);
+
+            let sign = '-';
+            if(type === 'deposit') sign = '+';
+            else if(type === 'transfer' && t.description.toLowerCase().includes('received'))
+                sign = '+';
+
+            const icon = type==='deposit'?'📥':type==='withdrawal'?'💸':'🔁';
+
+            return `
+            <div class="transaction-item ${type}">
+                <div class="transaction-info">
+                    <div class="transaction-icon">${icon}</div>
+                    <div class="transaction-details">
+                        <div class="type">${t.description}</div>
+                        <div class="date">${new Date(t.date).toLocaleString('en-IN')}</div>
+                    </div>
+                </div>
+                <div class="transaction-right">
+                    <div class="transaction-amount">${sign}₹${t.amount.toFixed(2)}</div>
+                    <div class="balance-display">Balance ₹${t.currBalance.toFixed(2)}</div>
+                </div>
+            </div>`;
+        }).join('');
+
+        pag.innerHTML='';
+        for(let i=1;i<=totalPages;i++){
+            pag.innerHTML+=`<button class="${i===currentPage?'active':''}" onclick="go(${i})">${i}</button>`;
+        }
+    }
+
+    function go(p){currentPage=p;render()}
+    function logout(){location.href='home.html'}
+
+    window.onload=()=>{
+        getUserIdFromURL();
+        loadPassbook();
+    }
+</script>
+</body>
+</html>

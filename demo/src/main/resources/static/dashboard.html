@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Banking System - Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .header-left p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+
+        .logout-btn {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: white;
+            color: #667eea;
+        }
+
+        .content {
+            padding: 40px 30px;
+        }
+
+        .dashboard-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .dashboard-header h2 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .user-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        .user-info p {
+            color: #666;
+            margin: 8px 0;
+            font-size: 14px;
+        }
+
+        .user-info strong {
+            color: #333;
+        }
+
+        .account-balance {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .account-balance p {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .balance-amount {
+            font-size: 36px;
+            font-weight: bold;
+        }
+
+        .transaction-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+
+        .btn {
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-withdraw {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .btn-withdraw:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+        }
+
+        .btn-deposit {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .btn-deposit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
+        }
+
+        .btn-transfer {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+        }
+
+        .btn-transfer:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(67, 233, 123, 0.4);
+        }
+
+        .btn-icon {
+            font-size: 24px;
+        }
+
+        .transactions-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 12px;
+        }
+
+        .transactions-section h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .transaction-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid #667eea;
+        }
+
+        .transaction-info p {
+            margin: 3px 0;
+            font-size: 14px;
+        }
+
+        .transaction-info .type {
+            color: #333;
+            font-weight: 600;
+        }
+
+        .transaction-info .date {
+            color: #999;
+            font-size: 12px;
+        }
+
+        .transaction-amount {
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .transaction-amount.debit {
+            color: #f5576c;
+        }
+
+        .transaction-amount.credit {
+            color: #43e97b;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .btn-modal {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-cancel {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-cancel:hover {
+            background: #e0e0e0;
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #999;
+            padding: 20px;
+        }
+        .btn-action {
+    color: white;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-action:hover {
+    transform: translateY(-2px);
+}
+
+.btn-passbook {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-passbook:hover {
+    box-shadow: 0 6px 18px rgba(102, 126, 234, 0.45);
+}
+
+
+        @media (max-width: 600px) {
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .transaction-buttons {
+                grid-template-columns: 1fr;
+            }
+
+            .transaction-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .transaction-amount {
+                align-self: flex-end;
+            }
+            btn-action {
+                color: white;
+                font-weight: 600;
+                border-radius: 8px;
+                transition: all 0.3s ease;
+            }
+
+            .btn-action:hover {
+                transform: translateY(-2px);
+            }
+            .btn-withdraw {
+                background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            }
+
+            .btn-withdraw:hover {
+                box-shadow: 0 6px 18px rgba(245, 87, 108, 0.4);
+            }
+
+            .btn-deposit {
+                background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            }
+
+            .btn-deposit:hover {
+                box-shadow: 0 6px 18px rgba(79, 172, 254, 0.4);
+            }
+
+            .btn-transfer {
+                background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            }
+
+            .btn-transfer:hover {
+                box-shadow: 0 6px 18px rgba(67, 233, 123, 0.4);
+            }
+
+            .btn-passbook {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            }
+
+            .btn-passbook:hover {
+                box-shadow: 0 6px 18px rgba(102, 126, 234, 0.45);
+            }
+
+
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="header-left">
+            <h1>VBS</h1>
+            <p>Virtual Banking System</p>
+        </div>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+
+    <div class="content">
+
+        <div class="dashboard-header">
+            <h2 id="welcomeText">Welcome</h2>
+            <p>User ID: <strong><span id="userId">-</span></strong></p>
+        </div>
+
+        <div id="dashMessage" class="message"></div>
+
+        <div class="account-balance">
+            <p>Available Balance</p>
+            <div class="balance-amount">₹ <span id="balance">0.00</span></div>
+        </div>
+
+        <div class="transaction-buttons">
+            <button class="btn btn-action btn-withdraw" onclick="openWithdrawModal()">
+                Withdraw
+            </button>
+
+            <button class="btn btn-action btn-deposit" onclick="openDepositModal()">
+                Deposit
+            </button>
+
+            <button class="btn btn-action btn-transfer" onclick="openTransferModal()">
+                Transfer
+            </button>
+
+            <button class="btn btn-action btn-passbook" onclick="goToPassbook()">
+                Passbook
+            </button>
+
+            <button class="btn btn-action btn-passbook" onclick="openUpdateModal()">
+                Update Profile
+            </button>
+
+
+        </div>
+    </div>
+</div>
+
+
+<div id="withdrawModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">Withdraw Funds</div>
+        <form id="withdrawForm">
+            <div class="form-group">
+                <label>Amount</label>
+                <input type="number" id="withdrawAmount" step="0.01" min="0" required>
+            </div>
+
+            <div class="modal-buttons">
+                <button type="button" class="btn-modal btn-cancel" onclick="closeWithdrawModal()">Cancel</button>
+                <button type="submit" class="btn-modal btn-submit">Withdraw</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<div id="depositModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">Deposit Funds</div>
+        <form id="depositForm">
+            <div class="form-group">
+                <label>Amount</label>
+                <input type="number" id="depositAmount" step="0.01" min="0" required>
+            </div>
+
+            <div class="modal-buttons">
+                <button type="button" class="btn-modal btn-cancel" onclick="closeDepositModal()">Cancel</button>
+                <button type="submit" class="btn-modal btn-submit">Deposit</button>
+            </div>
+        </form>
+    </div>
+</div>
+<div id="updateModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">Update Profile</div>
+        <form id="updateForm">
+            <div class="form-group">
+                <label>Field</label>
+                <select id="updateKey" required>
+                    <option value="name">Name</option>
+                    <option value="password">Password</option>
+                    <option value="email">Email</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>New Value</label>
+                <input type="text" id="updateValue" required>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn-modal btn-cancel" onclick="closeUpdateModal()">Cancel</button>
+                <button type="submit" class="btn-modal btn-submit">Update</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="transferModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">Transfer Funds</div>
+        <form id="transferForm">
+            <div class="form-group">
+                <label>Recipient Username</label>
+                <input type="text" id="transferUsername" required>
+            </div>
+            <div class="form-group">
+                <label>Amount</label>
+                <input type="number" id="transferAmount" step="0.01" min="0" required>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn-modal btn-cancel" onclick="closeTransferModal()">Cancel</button>
+                <button type="submit" class="btn-modal btn-submit">Send</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<script>
+    const API_URL = 'http://localhost:8081';
+    let userId = null;
+    let role = 'customer';
+    function getUserIdFromURL() {
+        const params = new URLSearchParams(window.location.search);
+        userId = params.get('id');
+        role = params.get('role') || 'customer';
+
+        if (!userId) {
+            window.location.href = 'login.html';
+        }
+    }
+
+    async function loadDashboard() {
+        document.getElementById('userId').textContent = userId;
+
+        try {
+            const res = await fetch(`${API_URL}/get-details/${userId}`);
+            const data = await res.json();
+
+            if (document.getElementById('welcomeText')) {
+                document.getElementById('welcomeText').textContent =
+                    `Welcome ${data.username}`;
+            }
+
+            if (document.getElementById('balance')) {
+                document.getElementById('balance').textContent =
+                    data.balance.toFixed(2);
+            }
+        } catch {
+            showMessage('dashMessage', 'Failed to load dashboard', 'error');
+        }
+    }
+
+    function openWithdrawModal() {
+        document.getElementById('withdrawModal').classList.add('show');
+    }
+
+    function closeWithdrawModal() {
+        document.getElementById('withdrawModal').classList.remove('show');
+        document.getElementById('withdrawForm').reset();
+    }
+
+    function openDepositModal() {
+        document.getElementById('depositModal').classList.add('show');
+    }
+
+    function closeDepositModal() {
+        document.getElementById('depositModal').classList.remove('show');
+        document.getElementById('depositForm').reset();
+    }
+
+    function openTransferModal() {
+        document.getElementById('transferModal').classList.add('show');
+    }
+
+    function closeTransferModal() {
+        document.getElementById('transferModal').classList.remove('show');
+        document.getElementById('transferForm').reset();
+    }
+
+    function showMessage(elementId, message, type) {
+        const messageEl = document.getElementById(elementId);
+        messageEl.textContent = message;
+        messageEl.className = `message ${type} show`;
+        setTimeout(() => {
+            messageEl.classList.remove('show');
+        }, 3000);
+    }
+
+    const withdrawForm = document.getElementById('withdrawForm');
+    if (withdrawForm) {
+        withdrawForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const withdrawData = {
+                id: parseInt(userId),
+                amount: parseFloat(document.getElementById('withdrawAmount').value)
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/withdraw`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(withdrawData)
+                });
+                const result = await response.text();
+
+                if (result && result.toLowerCase().includes('withdrawal')) {
+                    showMessage('dashMessage', 'Withdrawal successful!', 'success');
+                    closeWithdrawModal();
+                    loadDashboard();
+                } else {
+                    showMessage('dashMessage', result || 'Withdrawal failed', 'error');
+                }
+            } catch (error) {
+                showMessage('dashMessage', 'Error processing withdrawal', 'error');
+                console.error(error);
+            }
+        });
+    }
+        function openUpdateModal() {
+           document.getElementById('updateModal').classList.add('show');
+        }
+
+        function closeUpdateModal() {
+            document.getElementById('updateModal').classList.remove('show');
+            document.getElementById('updateForm').reset();
+        }
+
+    const depositForm = document.getElementById('depositForm');
+    if (depositForm) {
+        depositForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const depositData = {
+                id: parseInt(userId),
+                amount: parseFloat(document.getElementById('depositAmount').value)
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/deposit`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(depositData)
+                });
+                const result = await response.text();
+
+                if (result && result.toLowerCase().includes('deposit')) {
+                    showMessage('dashMessage', 'Deposit successful!', 'success');
+                    closeDepositModal();
+                    loadDashboard();
+                } else {
+                    showMessage('dashMessage', result || 'Deposit failed', 'error');
+                }
+            } catch (error) {
+                showMessage('dashMessage', 'Error processing deposit', 'error');
+                console.error(error);
+            }
+        });
+    }
+
+    const transferForm = document.getElementById('transferForm');
+    if (transferForm) {
+        transferForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const transferData = {
+                id: parseInt(userId),
+                amount: parseFloat(document.getElementById('transferAmount').value),
+                username: document.getElementById('transferUsername').value
+            };
+
+            if (!transferData.username) {
+                showMessage('dashMessage', 'Enter recipient username.', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/transfer`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(transferData)
+                });
+                const result = await response.text();
+
+                if (response.ok && result && result.toLowerCase().includes('successfully')) {
+                    showMessage('dashMessage', 'Transfer successful!', 'success');
+                    closeTransferModal();
+                    loadDashboard();
+                } else {
+                    showMessage('dashMessage', result || 'Transfer failed', 'error');
+                }
+            } catch (error) {
+                showMessage('dashMessage', 'Error processing transfer', 'error');
+                console.error(error);
+            }
+        });
+    }
+
+    function logout() {
+        window.location.href = 'home.html';
+    }
+    function validateUserAccess() {
+    const storedUserId = localStorage.getItem("userId");
+    const storedRole = localStorage.getItem("role") || "customer";
+
+    const params = new URLSearchParams(window.location.search);
+    const urlUserId = params.get("id");
+
+
+    if (!storedUserId) {
+        window.location.href = "login.html";
+        return;
+    }
+
+
+    if (urlUserId && urlUserId !== storedUserId) {
+        alert("Unauthorized access detected!");
+        window.location.href = "login.html";
+        return;
+    }
+
+
+    userId = storedUserId;
+    role = storedRole;
+
+
+    window.history.replaceState({}, document.title, "dashboard.html");
+}
+
+
+    function goToPassbook() {
+        window.location.href =
+            `passbook.html?id=${userId}&role=${encodeURIComponent(role)}`;
+    }
+
+
+   window.addEventListener('DOMContentLoaded', () => {
+    validateUserAccess();
+    loadDashboard();
+});
+
+
+    window.addEventListener('click', (e) => {
+        const withdrawModal = document.getElementById('withdrawModal');
+        const depositModal = document.getElementById('depositModal');
+        const transferModal = document.getElementById('transferModal');
+
+        if (e.target === withdrawModal) withdrawModal.classList.remove('show');
+        if (e.target === depositModal) depositModal.classList.remove('show');
+        if (e.target === transferModal) transferModal.classList.remove('show');
+    });
+
+    document.getElementById('updateForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const key = document.getElementById('updateKey').value;
+            const value = document.getElementById('updateValue').value;
+
+            const updateData = {
+                id: parseInt(userId),
+                key: key,
+                value: value
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/update`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updateData)
+                });
+                const result = await response.text();
+                if (response.ok && result && result.toLowerCase().includes('successfully')) {
+                    showMessage('dashMessage', 'Profile updated successfully!', 'success');
+                    closeUpdateModal();
+                    loadDashboard();
+                } else {
+                    showMessage('dashMessage', result || 'Update failed', 'error');
+                }
+            } catch (error) {
+                showMessage('dashMessage', 'Error updating profile', 'error');
+                console.error('Update error:', error);
+            }
+        });
+
+</script>
+
+</body>
+</html>
